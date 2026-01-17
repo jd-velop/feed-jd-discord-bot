@@ -138,7 +138,15 @@ class JDBot(discord.Client):
         command = message.content.split()[0].lower()[1:] # Skip the "!" prefix
         args = message.content.split()[1:]
 
-        if command == "cleardata":
+        if command == "help":
+            help_text = (
+                "**Admin Commands:**\n"
+                "- `!help` Show this help message\n"
+                "- `!cleardata` Clear all JD data\n"
+            )
+            await message.channel.send(help_text)
+
+        elif command == "cleardata":
             self.jd_data = {}
             self.save_data()
             await message.channel.send("All data cleared.")
