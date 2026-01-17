@@ -142,12 +142,27 @@ class JDBot(discord.Client):
             help_text = (
                 "**Admin Commands:**\n"
                 "- `!help` Show this help message\n"
+                "- `!checkuser <user_id>` Check JD status for a user\n"
                 "- `!cleardata` Clear all JD data\n"
                 "- `!forcedaily` Force a daily JD check\n"
                 "- `!listall` List all JDs\n"
                 "- `!rename <user_id> <new_name>` Rename a user's JD\n"
             )
             await message.channel.send(help_text)
+
+        elif command == "checkuser":
+
+            user_id_str = args[0].strip("<>@!")
+            jd = self.jd_data.get(user_id_str)
+            if jd:
+                status = self.check_jd_status(int(user_id_str))
+                last_fed = datetime.fromisoformat(jd["last_fed"])
+                days_since = (self.now() - last_fed).days
+
+                response = f"<@{user_id_str}>: {jd['name']} ({status}) - Last fed: {last_fed.strftime('%Y-%m-%d')} - Days since last fed: {days_since}\n"
+                await message.channel.send(response)
+            else:
+                await message.channel.send(f"No JD found for user ID {user_id_str}.")
 
         elif command == "cleardata":
             self.jd_data = {}
