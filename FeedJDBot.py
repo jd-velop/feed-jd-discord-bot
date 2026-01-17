@@ -91,10 +91,8 @@ async def on_message(message):
                 await message.add_reaction('✅')
                 return
 
-
-
     if message.channel.id != FEED_CHANNEL_ID or message.author == bot.user:
-        return # Ignore messages not in the feed channel or sent by the bot
+        return  # Ignore messages not in the feed channel or sent by the bot
     
     
     if EMOTE in message.content:
@@ -145,7 +143,7 @@ async def on_message(message):
                 bot.jd_data[user_id_str] = {
                     'name': jd_name,
                     'creation_time': datetime.now().isoformat(),
-                    'last_fed': (datetime.now() - timedelta(days=1)).isoformat(), # yesterday to allow immediate feeding
+                    'last_fed': (datetime.now() - timedelta(days=1)).isoformat(),  # yesterday to allow immediate feeding
                     'total_feedings': 0,
                     'dead': False,
                 }
@@ -161,7 +159,7 @@ async def on_message(message):
         else:
             status = bot.check_jd_status(message.author.id)
             if status == 'dead':
-                return # JD is dead, ignore feeding attempts
+                return  # JD is dead, ignore feeding attempts
             elif status == 'alive':
                 # Update last fed time and increment total feedings
                 jd['last_fed'] = datetime.now().isoformat()
@@ -171,6 +169,6 @@ async def on_message(message):
                 await message.add_reaction('✅')
                 return
             else:
-                return # No JD data, ignore
+                return  # No JD data, ignore
 
 bot.run(os.getenv('DISCORD_BOT_TOKEN'))
