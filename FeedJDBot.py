@@ -214,6 +214,9 @@ class JDBot(discord.Client):
             TESTING_MODE = args[0].lower() == "on"
             await message.channel.send(f"Testing mode set to {TESTING_MODE}.")
 
+        else:
+            await message.channel.send(f"Unknown command: {command}. Type `!help` for a list of commands.")
+
     # --- Message handling ---------------------------------------------
     async def handle_feed(self, message: discord.Message) -> None:
         user_id_str = self.user_key(message.author.id)
