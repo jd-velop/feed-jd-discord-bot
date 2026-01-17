@@ -147,6 +147,7 @@ class JDBot(discord.Client):
                 "- `!cleardata` Clear all JD data\n"
                 "- `!forcedaily` Force a daily JD check\n"
                 "- `!listall` List all JDs\n"
+                "- `!nextcheck` Show time until next daily check\n"
                 "- `!rename <user_id> <new_name>` Rename a user's JD\n"
                 "- `!testmode <on|off>` Toggle testing mode\n"
             )
@@ -191,6 +192,17 @@ class JDBot(discord.Client):
                 last_fed = datetime.fromisoformat(jd["last_fed"]).strftime("%Y-%m-%d")
                 response += f"<@{user_id_str}>: {jd['name']} ({status}) - Last fed: {last_fed} - Feedings: {jd.get('total_feedings')}\n"
             await message.channel.send(response)
+
+        elif command == "nextcheck":
+            now = self.now()
+            target_time = datetime.combine(now.date(), WHEN)
+            if now >= target_time:
+                target_time += timedelta(days=1) # if past today's check time, go to next day
+            delta = target_time - now
+            hours, remainder = divmod(int(delta.total_seconds()), 3600)
+            minutes, seconds = divmod(remainder, 60)
+
+            await message.channel.send(f"Next daily check in `{hours}h {minutes}m {seconds}s`.")
 
         elif command == "rename":
             if len(args) != 2:
