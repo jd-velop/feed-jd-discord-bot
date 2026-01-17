@@ -15,8 +15,8 @@ INTENTS = discord.Intents.default()
 INTENTS.message_content = True
 
 # --- Config -----------------------------------------------------
-FEED_CHANNEL_ID = 1461853646395408407 # test channel ID
-ADMIN_USER_ID = 299680580591943690
+FEED_CHANNEL_ID = int(os.getenv("FEED_CHANNEL_ID"))
+ADMIN_USER_ID = int(os.getenv("ADMIN_USER_ID"))
 DATA_FILE = "jd_data.json"
 EMOTE = ":feed_jd:"
 DEFAULT_NAME = "JD"
