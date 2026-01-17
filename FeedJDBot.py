@@ -46,11 +46,11 @@ class JDBot(discord.Client):
 
         if TESTING_MODE:
             print(f"Message from {message.author}: {message.content}")
-            if message.author.id == ADMIN_USER_ID and message.content.startswith("!cleardata"):
-                self.jd_data = {}
-                self.save_data()
-                await message.add_reaction("✅")
-                return
+
+        # Admin commands
+        if message.author.id == ADMIN_USER_ID and message.content.startswith("!"):
+            await self.handle_admin_command(message)
+            return
 
         if message.channel.id != FEED_CHANNEL_ID:
             return
@@ -132,6 +132,17 @@ class JDBot(discord.Client):
         ]
         return random.choice(causes)
     
+    # --- Admin commands ------------------------------------------------
+    async def handle_admin_command(self, message: discord.Message) -> None:
+        """Handle admin debugging commands."""
+        command = message.content.lower().split()[1:] # Skip the "!" prefix
+        args = message.content.split()[1:]
+
+        if command[0] == "cleardata":
+            self.jd_data = {}
+            self.save_data()
+            await message.channel.send("All data cleared.")
+        
     # --- Message handling ---------------------------------------------
     async def handle_feed(self, message: discord.Message) -> None:
         user_id_str = self.user_key(message.author.id)
