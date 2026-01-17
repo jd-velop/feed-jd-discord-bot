@@ -1,2 +1,3 @@
 # feed-jd-discord-bot
-A fun little discord bot that checks to see if people remember to feed their jd in the #feed-jd channel. VERY IMPORTANT
+
+A Discord bot that lets you feed your JD daily or they fucking die. Just some fuckass shit, really.
