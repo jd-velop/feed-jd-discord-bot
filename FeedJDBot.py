@@ -135,10 +135,10 @@ class JDBot(discord.Client):
     # --- Admin commands ------------------------------------------------
     async def handle_admin_command(self, message: discord.Message) -> None:
         """Handle admin debugging commands."""
-        command = message.content.lower().split()[1:] # Skip the "!" prefix
+        command = message.content.split()[0].lower()[1:] # Skip the "!" prefix
         args = message.content.split()[1:]
 
-        if command[0] == "cleardata":
+        if command == "cleardata":
             self.jd_data = {}
             self.save_data()
             await message.channel.send("All data cleared.")
