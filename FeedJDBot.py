@@ -20,7 +20,7 @@ ADMIN_USER_ID = int(os.getenv("ADMIN_USER_ID"))
 DATA_FILE = "jd_data.json"
 EMOTE = ":feed_jd:"
 DEFAULT_NAME = "JD"
-MAX_DAYS_MISSED = 2
+MAX_DAYS_MISSED = 3
 TESTING_MODE = True
 EST = ZoneInfo("America/New_York")
 WHEN = time(hour=20, tzinfo=EST)  # 8:00 PM EST
