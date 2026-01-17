@@ -174,7 +174,7 @@ class JDBot(discord.Client):
                 f"Last fed: {last_fed.strftime('%Y-%m-%d %H:%M:%S')} ({days_since} days ago)\n"
                 f"Total feedings: {jd.get('total_feedings', 0)}\n"
                 f"Created: {jd.get('creation_time', 'Unknown')}\n"
-                f"Death notified: {jd.get('death_notified', False)}\n")
+                )
                 await message.channel.send(response)
             else:
                 await message.channel.send(f"No JD found for user ID {user_id_str}.")
