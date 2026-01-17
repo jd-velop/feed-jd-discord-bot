@@ -149,6 +149,7 @@ class JDBot(discord.Client):
                 "- `!listall` List all JDs\n"
                 "- `!nextcheck` Show time until next daily check\n"
                 "- `!rename <user_id> <new_name>` Rename a user's JD\n"
+                "- `!revive <user_id>` Revive a dead JD\n"
                 "- `!testmode <on|off>` Toggle testing mode\n"
             )
             await message.channel.send(help_text)
@@ -218,6 +219,22 @@ class JDBot(discord.Client):
                 await message.channel.send(f"Renamed JD from '{old_name}' to '{new_name}'.")
             else:
                 await message.channel.send(f"No JD found for user ID {user_id_str}.")
+
+        elif command == "revive":
+            if len(args) != 1:
+                await message.channel.send("Usage: `!revive <user_id>`")
+                return
+            user_id_str = args[0]
+            jd = self.jd_data.get(user_id_str)
+            if jd:
+                if jd.get("dead"): # if jd is dead
+                    jd["dead"] = False
+                    jd["last_fed"] = self.iso(self.now() - timedelta(days=1))  # allow immediate feeding
+                    jd.pop("death_date", None) # None so that it doesn't error if key not present
+                    jd.pop("death_notified", None) 
+                    jd.pop("cause_of_death", None)
+                    self.save_data()
+                    await message.channel.send(f"Revived {jd['name']}.")
 
         elif command == "testmode":
             if len(args) != 1 or args[0].lower() not in ["on", "off"]:
