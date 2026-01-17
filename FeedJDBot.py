@@ -151,6 +151,9 @@ class JDBot(discord.Client):
             await message.channel.send(help_text)
 
         elif command == "checkuser":
+            if len(args) != 1:
+                await message.channel.send("Usage: `!checkuser <user_id>`")
+                return
 
             user_id_str = args[0].strip("<>@!")
             jd = self.jd_data.get(user_id_str)
@@ -159,7 +162,13 @@ class JDBot(discord.Client):
                 last_fed = datetime.fromisoformat(jd["last_fed"])
                 days_since = (self.now() - last_fed).days
 
-                response = f"<@{user_id_str}>: {jd['name']} ({status}) - Last fed: {last_fed.strftime('%Y-%m-%d')} - Days since last fed: {days_since}\n"
+                response = (f"**JD Info for <@{user_id_str}>:**\n"
+                f"Name: {jd['name']}\n"
+                f"Status: {status}\n"
+                f"Last fed: {last_fed.strftime('%Y-%m-%d %H:%M:%S')} ({days_since} days ago)\n"
+                f"Total feedings: {jd.get('total_feedings', 0)}\n"
+                f"Created: {jd.get('creation_time', 'Unknown')}\n"
+                f"Death notified: {jd.get('death_notified', False)}\n")
                 await message.channel.send(response)
             else:
                 await message.channel.send(f"No JD found for user ID {user_id_str}.")
