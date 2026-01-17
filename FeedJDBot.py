@@ -135,6 +135,7 @@ class JDBot(discord.Client):
     # --- Admin commands ------------------------------------------------
     async def handle_admin_command(self, message: discord.Message) -> None:
         """Handle admin debugging commands."""
+        global TESTING_MODE
         command = message.content.split()[0].lower()[1:] # Skip the "!" prefix
         args = message.content.split()[1:]
 
@@ -147,6 +148,7 @@ class JDBot(discord.Client):
                 "- `!forcedaily` Force a daily JD check\n"
                 "- `!listall` List all JDs\n"
                 "- `!rename <user_id> <new_name>` Rename a user's JD\n"
+                "- `!testmode <on|off>` Toggle testing mode\n"
             )
             await message.channel.send(help_text)
 
@@ -204,6 +206,13 @@ class JDBot(discord.Client):
                 await message.channel.send(f"Renamed JD from '{old_name}' to '{new_name}'.")
             else:
                 await message.channel.send(f"No JD found for user ID {user_id_str}.")
+
+        elif command == "testmode":
+            if len(args) != 1 or args[0].lower() not in ["on", "off"]:
+                await message.channel.send("Usage: `!testmode <on|off>`")
+                return
+            TESTING_MODE = args[0].lower() == "on"
+            await message.channel.send(f"Testing mode set to {TESTING_MODE}.")
 
     # --- Message handling ---------------------------------------------
     async def handle_feed(self, message: discord.Message) -> None:
