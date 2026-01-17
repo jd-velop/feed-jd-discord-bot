@@ -150,6 +150,7 @@ class JDBot(discord.Client):
                 "- `!nextcheck` Show time until next daily check\n"
                 "- `!rename <user_id> <new_name>` Rename a user's JD\n"
                 "- `!revive <user_id>` Revive a dead JD\n"
+                "- `!setfed <user_id> <days_ago>` Set last fed date for a JD\n"
                 "- `!testmode <on|off>` Toggle testing mode\n"
             )
             await message.channel.send(help_text)
@@ -235,6 +236,26 @@ class JDBot(discord.Client):
                     jd.pop("cause_of_death", None)
                     self.save_data()
                     await message.channel.send(f"Revived {jd['name']}.")
+
+        elif command == "setfed":
+            if len(args) != 2:
+                await message.channel.send("Usage: `!setfed <user_id> <days_ago>`")
+                return
+            user_id_str = args[0]
+            try:
+                days_ago = int(args[1])
+            except ValueError:
+                await message.channel.send("arg 2 <days_ago> must be a number.")
+                return
+
+            jd = self.jd_data.get(user_id_str)
+            if jd:
+                jd["last_fed"] = self.iso(self.now() - timedelta(days=days_ago))
+                self.save_data()
+                await message.channel.send(f"Set {jd['name']}'s last fed time to {days_ago} days ago.")
+            else:
+                await message.channel.send("No JD found for that user")
+                return
 
         elif command == "testmode":
             if len(args) != 1 or args[0].lower() not in ["on", "off"]:
