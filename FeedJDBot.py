@@ -16,6 +16,7 @@ INTENTS.message_content = True
 
 # --- Config -----------------------------------------------------
 FEED_CHANNEL_ID = 1461853646395408407 # test channel ID
+ADMIN_USER_ID = 299680580591943690
 DATA_FILE = "jd_data.json"
 EMOTE = ":feed_jd:"
 DEFAULT_NAME = "JD"
@@ -45,7 +46,7 @@ class JDBot(discord.Client):
 
         if TESTING_MODE:
             print(f"Message from {message.author}: {message.content}")
-            if message.author.id == 299680580591943690 and message.content.startswith("!cleardata"):
+            if message.author.id == ADMIN_USER_ID and message.content.startswith("!cleardata"):
                 self.jd_data = {}
                 self.save_data()
                 await message.add_reaction("✅")
