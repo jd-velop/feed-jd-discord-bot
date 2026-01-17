@@ -143,6 +143,7 @@ class JDBot(discord.Client):
                 "**Admin Commands:**\n"
                 "- `!help` Show this help message\n"
                 "- `!cleardata` Clear all JD data\n"
+                "- `!forcedaily` Force a daily JD check\n"
             )
             await message.channel.send(help_text)
 
@@ -150,6 +151,10 @@ class JDBot(discord.Client):
             self.jd_data = {}
             self.save_data()
             await message.channel.send("All data cleared.")
+
+        elif command == "forcedaily":
+            await self.daily_jd_check()
+            await message.channel.send("Forced daily JD check.")
         
     # --- Message handling ---------------------------------------------
     async def handle_feed(self, message: discord.Message) -> None:
