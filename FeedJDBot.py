@@ -151,6 +151,7 @@ class JDBot(discord.Client):
                 "- `!rename <user_id> <new_name>` Rename a user's JD\n"
                 "- `!revive <user_id>` Revive a dead JD\n"
                 "- `!setfed <user_id> <days_ago>` Set last fed date for a JD\n"
+                "- `!stats` Display bot usage stats"
                 "- `!testmode <on|off>` Toggle testing mode\n"
             )
             await message.channel.send(help_text)
@@ -256,6 +257,22 @@ class JDBot(discord.Client):
             else:
                 await message.channel.send("No JD found for that user")
                 return
+            
+        elif command == "stats":
+            total_jds = len(self.jd_data)
+            alive = sum(1 for uid, jd in self.jd_data.items() if self.check_jd_status(int(uid)) == "alive")
+            dead = sum(1 for uid, jd in self.jd_data.items() if self.check_jd_status(int(uid)) == "dead")
+            total_feedings = sum(jd.get("total_feedings", 0) for jd in self.jd_data.values())
+
+            response = (
+                f"Total JDs: {total_jds}\n"
+                f"Alive: {alive}\n"
+                f"Dead: {dead}\n"
+                f"Total feedings: {total_feedings}\n"
+                f"Testing mode: {'ON' if TESTING_MODE else 'OFF'}\n"
+            )
+            await message.channel.send(response)
+
 
         elif command == "testmode":
             if len(args) != 1 or args[0].lower() not in ["on", "off"]:
