@@ -54,7 +54,7 @@ class JDBot(discord.Client):
             return None
         
         jd = self.jd_data[user_id_str]
-        if jd['dead'] == True:
+        if jd['dead']:
             return 'dead'
         
         last_fed = datetime.fromisoformat(jd['last_fed'])
@@ -65,11 +65,7 @@ class JDBot(discord.Client):
             jd['dead'] = True
             jd['death_date'] = now.isoformat()
             self.save_data()
-
-
             return 'dead'
-
-
         return 'alive'
 
 bot = JDBot()
@@ -175,6 +171,6 @@ async def on_message(message):
                 await message.add_reaction('✅')
                 return
             else:
-                return # No JD dat a, ignore
+                return # No JD data, ignore
 
 bot.run(os.getenv('DISCORD_BOT_TOKEN'))
