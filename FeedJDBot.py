@@ -144,6 +144,7 @@ class JDBot(discord.Client):
                 "- `!help` Show this help message\n"
                 "- `!cleardata` Clear all JD data\n"
                 "- `!forcedaily` Force a daily JD check\n"
+                "- `!listall` List all JDs\n"
                 "- `!rename <user_id> <new_name>` Rename a user's JD\n"
             )
             await message.channel.send(help_text)
@@ -156,6 +157,14 @@ class JDBot(discord.Client):
         elif command == "forcedaily":
             await self.daily_jd_check()
             await message.channel.send("Forced daily JD check.")
+
+        elif command == "listall":
+            response = "**JDs:**\n"
+            for user_id_str, jd in self.jd_data.items():
+                status = self.check_jd_status(int(user_id_str))
+                last_fed = datetime.fromisoformat(jd["last_fed"]).strftime("%Y-%m-%d")
+                response += f"<@{user_id_str}>: {jd['name']} ({status}) - Last fed: {last_fed} - Feedings: {jd.get('total_feedings')}\n"
+            await message.channel.send(response)
 
         elif command == "rename":
             if len(args) != 2:
