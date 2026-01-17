@@ -144,6 +144,7 @@ class JDBot(discord.Client):
                 "- `!help` Show this help message\n"
                 "- `!cleardata` Clear all JD data\n"
                 "- `!forcedaily` Force a daily JD check\n"
+                "- `!rename <user_id> <new_name>` Rename a user's JD\n"
             )
             await message.channel.send(help_text)
 
@@ -155,7 +156,22 @@ class JDBot(discord.Client):
         elif command == "forcedaily":
             await self.daily_jd_check()
             await message.channel.send("Forced daily JD check.")
-        
+
+        elif command == "rename":
+            if len(args) != 2:
+                await message.channel.send("Usage: `!rename <user_id> <new_name>`")
+                return
+            user_id_str = args[0]
+            new_name = args[1]
+            jd = self.jd_data.get(user_id_str)
+            if jd:
+                old_name = jd["name"]
+                jd["name"] = new_name
+                self.save_data()
+                await message.channel.send(f"Renamed JD from '{old_name}' to '{new_name}'.")
+            else:
+                await message.channel.send(f"No JD found for user ID {user_id_str}.")
+
     # --- Message handling ---------------------------------------------
     async def handle_feed(self, message: discord.Message) -> None:
         user_id_str = self.user_key(message.author.id)
