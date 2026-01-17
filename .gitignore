@@ -1,0 +1,4 @@
+.env
+jd_data.json
+.venv/
+__pycache__/
