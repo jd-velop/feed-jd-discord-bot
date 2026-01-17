@@ -117,43 +117,50 @@ async def on_message(message):
 
         # If user not in jd_data.json, initialize new JD and prompt user for a name
         if user_id_str not in bot.jd_data:
-            # Prompt user for a name
-            await message.channel.send(f"{message.author.mention}, what would you like to name your JD?")
-
-            def check_name(m):
-                return m.author == message.author and m.channel == message.channel
-            
+            # Try to send DM to user for adoption process
             try:
-                name_msg = await bot.wait_for('message', check=check_name, timeout=60.0)
-                poll_msg = await message.channel.send(f"Would you like to name your JD '{name_msg.content.strip()}'? (react with ✅ to confirm or ❌ to cancel)")
+                dm_channel = await message.author.create_dm()
+                await dm_channel.send(f"What would you like to name your JD?")
 
-                await poll_msg.add_reaction('✅')
-                await poll_msg.add_reaction('❌')
-
-                def check_reaction(reaction, user):
-                    return user == message.author and str(reaction.emoji) in ['✅', '❌'] and reaction.message.id == poll_msg.id
-                reaction, user = await bot.wait_for('reaction_add', check=check_reaction, timeout=60.0)
-                if str(reaction.emoji) == '✅':
-                    jd_name = name_msg.content.strip()
-                else:
-                    jd_name = DEFAULT_NAME
+                def check_name(m):
+                    return m.author == message.author and isinstance(m.channel, discord.DMChannel)
                 
-                if not jd_name:
-                    jd_name = DEFAULT_NAME
-                    
-            except asyncio.TimeoutError:
-                jd_name = DEFAULT_NAME
+                try:
+                    name_msg = await bot.wait_for('message', check=check_name, timeout=60.0)
+                    poll_msg = await dm_channel.send(f"Would you like to name your JD '{name_msg.content.strip()}'? (react with ✅ to confirm or ❌ to cancel)")
 
-            bot.jd_data[user_id_str] = {
-                'name': jd_name,
-                'creation_time': datetime.now().isoformat(),
-                'last_fed': (datetime.now() - timedelta(days=1)).isoformat(), # yesterday to allow immediate feeding
-                'total_feedings': 0,
-                'dead': False,
-            }
-            await message.channel.send(f"{message.author.mention} has adopted a new JD named '{jd_name}'! Don't fucking forget to feed him.")
-            bot.save_data()            
-            return
+                    await poll_msg.add_reaction('✅')
+                    await poll_msg.add_reaction('❌')
+
+                    def check_reaction(reaction, user):
+                        return user == message.author and str(reaction.emoji) in ['✅', '❌'] and reaction.message.id == poll_msg.id
+                    reaction, user = await bot.wait_for('reaction_add', check=check_reaction, timeout=60.0)
+                    if str(reaction.emoji) == '✅':
+                        jd_name = name_msg.content.strip()
+                    else:
+                        jd_name = DEFAULT_NAME
+                    
+                    if not jd_name:
+                        jd_name = DEFAULT_NAME
+                        
+                except asyncio.TimeoutError:
+                    jd_name = DEFAULT_NAME
+
+                bot.jd_data[user_id_str] = {
+                    'name': jd_name,
+                    'creation_time': datetime.now().isoformat(),
+                    'last_fed': (datetime.now() - timedelta(days=1)).isoformat(), # yesterday to allow immediate feeding
+                    'total_feedings': 0,
+                    'dead': False,
+                }
+                # Announce adoption in the feed channel
+                await message.channel.send(f"{message.author.mention} has adopted a new JD named '{jd_name}'! Don't fucking forget to feed him.")
+                bot.save_data()            
+                return
+            except discord.Forbidden:
+                # User has DMs disabled, fallback to feed channel
+                await message.channel.send(f"{message.author.mention}, I couldn't DM you! Please enable DMs from server members to adopt a JD.")
+                return
         # User has JD data, check status
         else:
             status = bot.check_jd_status(message.author.id)
