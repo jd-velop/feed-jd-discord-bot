@@ -1,88 +1,74 @@
 # Feed JD Discord Bot
 
-A Discord bot that simulates ownership of a pet in a discord server. Users feed their JDs in the designated feed channel, and the bot tracks feeding history, announces deaths when JDs aren't fed enough, and manages daily check-ins. Each user can adopt and name their very own handsome JD.
+A Discord bot that simulates ownership of a 'pet' in a discord text channel. Users adopt and feed their JDs in a dedicated channel; the bot tracks feedings, calls out neglect, and announces death if a JD is ignored for too long.
 
 ## Features
+- Adopt and name your own JD via DM prompt
+- Feed daily using the `:feed_jd:` emote; bot confirms with a ✅ reaction
+- Death detection after 2+ missed days, with death announcements
+- Automated daily check at 8:00 PM EST (America/New_York)
+- DM adoption flow keeps the text channel clean
+- JSON JD data storage for persistence across restarts
+- Admin/debug commands for live troubleshooting
 
-- **Virtual Pet**: Adopt and name your own JD
-- **Feeding Mechanics**: Feed your JD daily using the `:feed_jd:` emote
-- **Death Detection**: JDs die if not fed for 2+ days; deaths are announced in the feed channel
-- **Daily Check-ins**: Automated daily check at 8:00 PM EST to verify JD status
-- **DM-based Adoption**: New users are prompted via DM to name their JD to avoid channel clutter
-- **Data Storage**: JD data is stored in a JSON file for persistence across restarts
-- **Testing Mode**: Built-in testing commands for development and debugging
-
-## Setup
-
-### Prerequisites
-
+## Prerequisites
 - Python 3.9+
-- discord.py
-- python-dotenv
+- `discord.py`
+- `python-dotenv`
 
-### Installation
+## Installation
+```bash
+git clone https://github.com/jd-velop/feed-jd-discord-bot.git
+cd feed-jd-discord-bot
+pip install -r requirements.txt
+```
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/jd-velop/feed-jd-discord-bot.git
-   cd feed-jd-discord-bot
-   ```
+## Configuration (.env)
+Rename and refactor `example.env` to `.env` in the project root with:
+```
+DISCORD_BOT_TOKEN=your_bot_token
+FEED_CHANNEL_ID=123456789012345678   # channel where feeding happens
+ADMIN_USER_ID=123456789012345678    # user allowed to run admin commands
+```
 
-2. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
+## Running
+```bash
+python FeedJDBot.py
+```
 
-3. Create a `.env` file in the root directory and add your bot token:
-   ```
-   DISCORD_BOT_TOKEN=your_bot_token_here
-   ```
+## Admin Commands (ADMIN_USER_ID only)
 
-4. Run the bot:
-   ```bash
-   python FeedJDBot.py
-   ```
-
-## Configuration
-
-Edit the constants in `FeedJDBot.py` to customize:
-
-- `FEED_CHANNEL_ID`: The Discord channel where feeding happens
-- `DATA_FILE`: JSON file for persisting JD data (default: `jd_data.json`)
-- `EMOTE`: The string used to trigger feeding (default: `:feed_jd:`)
-- `DEFAULT_NAME`: Name given to JDs if user gives a blank name (default: `JD`)
-- `MAX_DAYS_MISSED`: Days before a JD dies (default: `2`)
-- `WHEN`: Daily check time in EST (default: `20:00` / 8:00 PM)
-- `TESTING_MODE`: Enable debug logging and test commands
-
-## Testing Commands
-
-When `TESTING_MODE` is enabled, the following commands are available to user ID `299680580591943690`:
-
-- `!cleardata`: Clears all JD data and resets the bot
+- `!help` Show commands
+- `!checkuser <user_id>` Check JD status for a user
+- `!cleardata` Clear all JD data
+- `!forcedaily` Force a daily JD check
+- `!listall` List all JDs
+- `!nextcheck` Show time until next daily check
+- `!rename <user_id> <new_name>` Rename a user's JD
+- `!revive <user_id>` Revive a dead JD
+- `!setfed <user_id> <days_ago>` Set last fed date for a JD
+- `!stats` Display bot usage stats
+- `!testmode <on|off>` Toggle testing mode
 
 ## Data Format
-
-JD data is stored in `jd_data.json` as a JSON object mapping user IDs to JD objects:
-
+Stored in `jd_data.json` mapping Discord user IDs to JD objects:
 ```json
 {
-  "123456789": {
-    "name": "JingleDingle",
-    "creation_time": "2026-01-17T15:30:00",
-    "last_fed": "2026-01-19T20:00:00",
-    "total_feedings": 3,
-    "dead": false
-  }
+   "123456789": {
+      "name": "JingleDingle",
+      "creation_time": "2026-01-17T15:30:00-05:00",
+      "last_fed": "2026-01-19T20:00:00-05:00",
+      "total_feedings": 3,
+      "dead": false
+   }
 }
 ```
 
 ## How It Works
+1. User posts `:feed_jd:` in the feed channel → bot DMs for a name → JD is created after confirmation.
+2. Daily feeding: posting `:feed_jd:` marks JD fed for that day and reacts ✅.
+3. Daily at 8:00 PM EST, the bot checks for neglected JDs and announces deaths.
 
-1. **Adoption**: User posts the feed emote in the feed channel → bot sends DM prompting for name → user confirms → JD is created
-2. **Feeding**: User posts feed emote once per day → bot confirms with ✅ reaction
-3. **Death Check**: Daily at 8:00 PM EST, bot checks all JDs → notifies channel of deaths
-
-## License
-
-Unlicensed
+## Notes
+- Timezone: America/New_York (EST/EDT handled by `zoneinfo`).
+- Persistence: JSON file `jd_data.json` in the repo root.
