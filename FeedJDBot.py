@@ -151,7 +151,7 @@ class JDBot(discord.Client):
                 "- `!rename <user_id> <new_name>` Rename a user's JD\n"
                 "- `!revive <user_id>` Revive a dead JD\n"
                 "- `!setfed <user_id> <days_ago>` Set last fed date for a JD\n"
-                "- `!stats` Display bot usage stats"
+                "- `!stats` Display bot usage stats\n"
                 "- `!testmode <on|off>` Toggle testing mode\n"
             )
             await message.channel.send(help_text)
