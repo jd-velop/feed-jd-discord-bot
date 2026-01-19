@@ -152,6 +152,58 @@ class JDBot(discord.Client):
             )
             await message.channel.send(help_text)
 
+        elif command == "status":
+            user_id_str = self.user_key(message.author.id)
+            jd = self.jd_data.get(user_id_str)
+            if jd:
+                status = self.check_jd_status(message.author.id)
+                last_fed = datetime.fromisoformat(jd["last_fed"])
+                days_since = (self.now() - last_fed).days
+
+                response = (f"**Your JD Info:**\n"
+                f"Name: {jd['name']}\n"
+                f"Status: {status}\n"
+                f"Last fed: {last_fed.strftime('%Y-%m-%d %H:%M:%S')} ({days_since} days ago)\n"
+                f"Total feedings: {jd.get('total_feedings', 0)}\n"
+                f"Created: {jd.get('creation_time', 'Unknown')}\n"
+                )
+                await message.channel.send(response)
+            else:
+                await message.channel.send("You do not have a JD yet. Adopt one using the emote.")
+
+        elif command == "listall":
+            response = "**JDs:**\n"
+            for user_id_str, jd in self.jd_data.items():
+                status = self.check_jd_status(int(user_id_str))
+                last_fed = datetime.fromisoformat(jd["last_fed"]).strftime("%Y-%m-%d")
+                response += f"<@{user_id_str}>: {jd['name']} ({status}) - Last fed: {last_fed} - Feedings: {jd.get('total_feedings')}\n"
+            await message.channel.send(response)
+        
+        elif command == "nextcheck":
+            now = self.now()
+            target_time = datetime.combine(now.date(), WHEN)
+            if now >= target_time:
+                target_time += timedelta(days=1) # if past today's check time, go to next day
+            delta = target_time - now
+            hours, remainder = divmod(int(delta.total_seconds()), 3600)
+            minutes, seconds = divmod(remainder, 60)
+
+            await message.channel.send(f"Next daily check in `{hours}h {minutes}m {seconds}s`.")
+
+        elif command == "stats":
+            total_jds = len(self.jd_data)
+            alive = sum(1 for uid, jd in self.jd_data.items() if self.check_jd_status(int(uid)) == "alive")
+            dead = sum(1 for uid, jd in self.jd_data.items() if self.check_jd_status(int(uid)) == "dead")
+            total_feedings = sum(jd.get("total_feedings", 0) for jd in self.jd_data.values())
+
+            response = (
+                f"Total JDs: {total_jds}\n"
+                f"Alive: {alive}\n"
+                f"Dead: {dead}\n"
+                f"Total feedings: {total_feedings}\n"
+            )
+            await message.channel.send(response)
+
         else:
             await message.channel.send(f"Unknown command: {command}. Type `!help` for a list of commands.")
 
