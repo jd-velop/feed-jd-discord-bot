@@ -132,6 +132,29 @@ class JDBot(discord.Client):
         ]
         return random.choice(causes)
     
+    # ---- User commands ------------------------------------------------
+    async def handle_user_command(self, message: discord.Message) -> None:
+        command = message.content.split()[0].lower()[1:] # Skip the "!" prefix
+        args = message.content.split()[1:]
+
+        if len(args) > 0:
+            await message.channel.send("Too many arguments provided.")
+            return
+        
+        if command == "help":
+            help_text = (
+                "**User Commands:**\n"
+                "- `!help` Show this help message\n"
+                "- `!status` Check your JD status\n"
+                "- `!listall` List all JDs\n"
+                "- `!nextcheck` Show time until next daily check\n"
+                "- `!stats` Display bot usage stats\n"
+            )
+            await message.channel.send(help_text)
+
+        else:
+            await message.channel.send(f"Unknown command: {command}. Type `!help` for a list of commands.")
+
     # --- Admin commands ------------------------------------------------
     async def handle_admin_command(self, message: discord.Message) -> None:
         """Handle admin debugging commands."""
