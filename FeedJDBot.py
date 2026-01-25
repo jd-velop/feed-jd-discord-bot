@@ -51,6 +51,11 @@ class JDBot(discord.Client):
         if message.author.id == ADMIN_USER_ID and message.content.startswith("!"):
             await self.handle_admin_command(message)
             return
+        
+        # User commands
+        if message.content.startswith("!"):
+            await self.handle_user_command(message)
+            return
 
         if message.channel.id != FEED_CHANNEL_ID:
             return
