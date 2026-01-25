@@ -260,9 +260,27 @@ class JDBot(discord.Client):
                 await message.channel.send(f"No JD found for user ID {user_id_str}.")
 
         elif command == "cleardata":
-            self.jd_data = {}
-            self.save_data()
-            await message.channel.send("All data cleared.")
+            await message.channel.send("This will clear all JD data in the database. Proceed? (yes/no).")
+
+            def check_confirmation(dm_message: discord.Message) -> bool:
+                return (
+                    dm_message.author == message.author
+                    and dm_message.channel == message.author.dm_channel
+                    and dm_message.content.lower() in ["yes", "no"]
+                )
+
+            try:
+                reaction_msg = await self.wait_for("message", check=check_confirmation, timeout=60.0)
+                if reaction_msg.content.lower() == "yes":
+                    self.jd_data = {}
+                    self.save_data()
+                    await message.channel.send("All data cleared.")
+                    return
+                elif reaction_msg.content.lower() == "no":
+                    await message.channel.send("Data deletion cancelled.")
+                    return
+            except asyncio.TimeoutError:
+                return
 
         elif command == "forcedaily":
             await self.daily_jd_check()
