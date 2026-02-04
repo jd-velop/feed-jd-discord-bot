@@ -43,6 +43,9 @@ class JDBot(discord.Client):
     async def on_message(self, message: discord.Message) -> None:
         if message.author == self.user:
             return
+        
+        if message.channel.id != FEED_CHANNEL_ID:
+            return
 
         if TESTING_MODE:
             print(f"Message from {message.author}: {message.content}")
@@ -55,9 +58,6 @@ class JDBot(discord.Client):
         # User commands
         if message.content.startswith("!"):
             await self.handle_user_command(message)
-            return
-
-        if message.channel.id != FEED_CHANNEL_ID:
             return
 
         if EMOTE not in message.content:
