@@ -265,7 +265,6 @@ class JDBot(discord.Client):
             def check_confirmation(dm_message: discord.Message) -> bool:
                 return (
                     dm_message.author == message.author
-                    and dm_message.channel == message.author.dm_channel
                     and dm_message.content.lower() in ["yes", "no"]
                 )
 
