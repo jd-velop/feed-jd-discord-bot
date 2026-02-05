@@ -12,6 +12,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from commands import handle_admin_command, handle_user_command
+from adoption import handle_adoption
 
 INTENTS = discord.Intents.default()
 INTENTS.message_content = True
@@ -21,7 +22,6 @@ FEED_CHANNEL_ID = int(os.getenv("FEED_CHANNEL_ID"))
 ADMIN_USER_ID = int(os.getenv("ADMIN_USER_ID"))
 DATA_FILE = "jd_data.json"
 EMOTE = ":feed_jd:"
-DEFAULT_NAME = "JD"
 MAX_DAYS_MISSED = 3
 TESTING_MODE = True
 EST = ZoneInfo("America/New_York")
@@ -34,6 +34,7 @@ class JDBot(discord.Client):
         self.jd_data = self.load_data()
         self.testing_mode = TESTING_MODE
         self.when = WHEN
+        self.adoption_in_progress: set[int] = set()
 
     # --- Bot -----------------------------------------------------
     async def setup_hook(self) -> None:
@@ -147,6 +148,7 @@ class JDBot(discord.Client):
         user_id_str = self.user_key(message.author.id)
         jd = self.jd_data.get(user_id_str)
 
+
         if jd:
             status = self.check_jd_status(message.author.id)
             if status == "dead":
@@ -158,52 +160,12 @@ class JDBot(discord.Client):
             self.record_feeding(jd)
             await message.add_reaction("✅")
             return
-
-        await self.start_adoption_flow(message)
-
-    async def start_adoption_flow(self, message: discord.Message) -> None:
-        await message.author.send(f"{message.author.mention}, what would you like to name your JD?")
-
-        def check_name(dm_message: discord.Message) -> bool:
-            return dm_message.author == message.author and dm_message.channel == message.author.dm_channel
-
-        try:
-            name_msg = await self.wait_for("message", check=check_name, timeout=60.0)
-            proposed_name = name_msg.content.strip()
-            await message.author.send(
-                f"Would you like to name your JD '{proposed_name}'? (reply with 'yes' or 'no')"
-            )
-
-            def check_confirmation(dm_message: discord.Message) -> bool:
-                return (
-                    dm_message.author == message.author
-                    and dm_message.channel == message.author.dm_channel
-                    and dm_message.content.lower() in ["yes", "no"]
-                )
-
-            try:
-                reaction_msg = await self.wait_for("message", check=check_confirmation, timeout=60.0)
-                if reaction_msg.content.lower() == "yes":
-                    jd_name = proposed_name or DEFAULT_NAME
-                elif reaction_msg.content.lower() == "no":
-                    return await self.start_adoption_flow(message)
-            except asyncio.TimeoutError:
-                return
-        except asyncio.TimeoutError:
+        
+        if message.author.id in self.adoption_in_progress: # adoption already in progress
             return
 
-        user_id_str = self.user_key(message.author.id)
-        self.jd_data[user_id_str] = {
-            "name": jd_name,
-            "creation_time": self.iso(self.now()),
-            "last_fed": self.iso(self.now() - timedelta(days=1)),  # allow immediate feeding
-            "total_feedings": 0,
-            "dead": False,
-        }
-        self.save_data()
-        await message.channel.send(
-            f"{message.author.mention} has adopted a new JD named '{jd_name}'! Don't forget to feed him! {EMOTE}"
-        )
+        await message.add_reaction("🍼")
+        await handle_adoption(self, message)
 
     # --- Daily checks --------------------------------------------------
     async def daily_jd_check(self) -> None:
